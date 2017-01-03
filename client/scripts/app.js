@@ -3,7 +3,8 @@
 var app = {};
 
 app.init = function() {
-
+  $('.username').on('click', this.handleUsernameClick());
+  $('.submit').on('click', this.handleSubmit());
 };
 
 app.send = function(message) {
@@ -34,13 +35,27 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
-  var newMessage = document.createElement('p');
-  newMessage.innerHTML = message.text;
+  var newMessage = document.createElement('div');
+  var newUsername = document.createElement('h3');
+  var newParagraph = document.createElement('p');
+  newUsername.innerHTML = message.username;
+  newParagraph.innerHTML = message.text;
+  newMessage.append(newUsername);
+  newMessage.append(newParagraph);
   $('#chats').append(newMessage);
+  $('#chats h3').addClass('username');
 };
 
 app.renderRoom = function(roomName) {
   var newRoom = document.createElement('option');
   newRoom.innerHTML = roomName;
   $('#roomSelect').append(newRoom);
+  $('#roomSelect option').addClass('roomname');
+};
+
+app.handleUsernameClick = function() {
+};
+
+
+app.handleSubmit = function() {
 };
