@@ -1,16 +1,26 @@
 // YOUR CODE HERE:
+window.onload = function() {
+  app.fetch();
+  app.loadFeed();
+};
+
+var tweets = [];
 
 var app = {};
 
-app.init = function() {
-  $('.username').on('click', this.handleUsernameClick());
-  $('.submit').on('click', this.handleSubmit());
+app.link = 'https://api.parse.com/1/classes/messages';
+
+app.loadFeed = function() {
+  for (var i = 0; i < tweets.length; i++) {
+    this.renderMessage(tweets[i]);
+  }
 };
+
 
 app.send = function(message) {
   $.ajax({
   // This is the url you should use to communicate with the parse API server.
-    url: 'https://api.parse.com/1/classes/messages',
+    url: app.link,
     type: 'POST',
     data: JSON.stringify(message),
     contentType: 'application/json',
@@ -24,11 +34,31 @@ app.send = function(message) {
   });
 };
 
-app.fetch = function(url) {
-  $.get(url, function() {
-
+app.fetch = function() {
+  $.ajax({
+    url: 'https://api.parse.com/1/classes/messages',
+    type: 'GET',
+    success: function(data) {
+      console.log(data);
+      for (var i = 0; i < data.results.length; i++) {
+        tweets.push(data.results[i]);
+      }
+    }
   });
 };
+
+// app.fetch = function() {
+//   $.ajax({
+//     url: 'https://api.parse.com/1/classes/messages',
+//     type: 'GET',
+//     dataType: 'jsonp',
+//     success: test
+//   });
+// };
+
+// var test = function(json) {
+//   console.log(json);
+// };
 
 app.clearMessages = function() {
   $('#chats').empty();
@@ -53,9 +83,12 @@ app.renderRoom = function(roomName) {
   $('#roomSelect option').addClass('roomname');
 };
 
-app.handleUsernameClick = function() {
-};
+app.handleUsernameClick = function() {};
+app.handleSubmit = function() {};
 
-
-app.handleSubmit = function() {
+app.init = function() {
+  $('.username').on('click', this.handleUsernameClick());
+  $('.submit').on('click', this.handleSubmit());
+  this.fetch();
+  this.loadFeed();
 };
