@@ -1,19 +1,18 @@
 // YOUR CODE HERE:
-window.onload = function() {
-  app.fetch();
-  app.loadFeed();
+$(document).ready(function() {
+  app.init();
+});
+
+
+var app = {
+  link: 'https://api.parse.com/1/classes/messages',
+  chatMessages: []
 };
 
-var tweets = [];
-
-var app = {};
-
-app.link = 'https://api.parse.com/1/classes/messages';
-
-app.loadFeed = function() {
-  for (var i = 0; i < tweets.length; i++) {
-    this.renderMessage(tweets[i]);
-  }
+app.init = function() {
+  $('.username').on('click', this.handleUsernameClick());
+  $('.submit').on('click', this.handleSubmit());
+  app.fetch();
 };
 
 
@@ -34,31 +33,38 @@ app.send = function(message) {
   });
 };
 
+app.handleSubmit = function() {
+  var textBox = $('#message').val();
+  console.log(textBox);
+};
+
+
+
+
+
+
+
 app.fetch = function() {
   $.ajax({
-    url: 'https://api.parse.com/1/classes/messages',
+    url: app.link,
     type: 'GET',
     success: function(data) {
-      console.log(data);
       for (var i = 0; i < data.results.length; i++) {
-        tweets.push(data.results[i]);
+        app.chatMessages.push(data.results[i]);
       }
+      app.loadFeed();
     }
   });
 };
 
-// app.fetch = function() {
-//   $.ajax({
-//     url: 'https://api.parse.com/1/classes/messages',
-//     type: 'GET',
-//     dataType: 'jsonp',
-//     success: test
-//   });
-// };
+app.loadFeed = function() {
+  for (var i = 0; i < app.chatMessages.length; i++) {
+    app.renderMessage(app.chatMessages[i]);
+  }
+};
 
-// var test = function(json) {
-//   console.log(json);
-// };
+
+
 
 app.clearMessages = function() {
   $('#chats').empty();
@@ -83,12 +89,23 @@ app.renderRoom = function(roomName) {
   $('#roomSelect option').addClass('roomname');
 };
 
-app.handleUsernameClick = function() {};
-app.handleSubmit = function() {};
 
-app.init = function() {
-  $('.username').on('click', this.handleUsernameClick());
-  $('.submit').on('click', this.handleSubmit());
-  this.fetch();
-  this.loadFeed();
-};
+
+app.handleUsernameClick = function() {};
+
+
+
+
+
+// app.fetch = function() {
+//   $.ajax({
+//     url: 'https://api.parse.com/1/classes/messages',
+//     type: 'GET',
+//     dataType: 'jsonp',
+//     success: test
+//   });
+// };
+
+// var test = function(json) {
+//   console.log(json);
+// };
