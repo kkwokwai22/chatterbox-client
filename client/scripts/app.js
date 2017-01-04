@@ -1,17 +1,21 @@
-// YOUR CODE HERE:
+
 $(document).ready(function() {
   app.init();
+  $('#chats').on('click', 'h3', function(e) {
+    app.handleUsernameClick(e.target.innerHTML);
+  });
 });
 
 var app = {
-  link: 'https://api.parse.com/1/classes/messages?order=-createdAt',
   chatMessages: [],
-  currentRoom: 'lobby'
+  currentRoom: 'lobby',
+  friendsList: [],
+  link: 'https://api.parse.com/1/classes/messages?order=-createdAt',
+  username: window.location.search.split('=')[1]
 };
 
 app.init = function() {
   app.fetch();
-  $('.username').on('click', this.handleUsernameClick());
   $('.submit').on('click', function(event) {
     event.preventDefault();
     app.handleSubmit();
@@ -21,7 +25,6 @@ app.init = function() {
 
 app.send = function(message) {
   $.ajax({
-  // This is the url you should use to communicate with the parse API server.
     url: app.link,
     type: 'POST',
     data: JSON.stringify(message),
@@ -31,37 +34,12 @@ app.send = function(message) {
       app.fetch();
     },
     error: function (data) {
-      // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
       console.error('chatterbox: Failed to send message', data);
     }
   });
 };
 
-app.handleSubmit = function() {
-  var textBox = $('#message').val();
-  var username = window.location.search.split('=')[1];
-  var newMessage = {
-    username: username,
-    text: textBox,
-    roomname: app.currentRoom
-  };
-  app.send(newMessage);
-};
-
-
 app.fetch = function() {
-  // setInterval(function() {
-  //   $.ajax({
-  //     url: app.link,
-  //     type: 'GET',
-  //     success: function(data) {
-  //       for (var i = 0; i < data.results.length; i++) {
-  //         app.chatMessages.push(data.results[i]);
-  //       }
-  //       app.loadFeed();
-  //     }
-  //   });
-  // }, 2000);
   console.log('performing fetch');
   $.ajax({
     url: app.link,
@@ -69,12 +47,10 @@ app.fetch = function() {
     success: function(data) {
       app.chatMessages = [];
       for (var i = 0; i < data.results.length; i++) {
-        if (!data.results[i].text.includes('<script>')) {
+        if (data.results[i].text && !data.results[i].text.includes('script') && !data.results[i].text.includes('html') && !data.results[i].text.includes('img') && !data.results[i].text.includes('$')) {
           app.chatMessages.push(data.results[i]);
         }
       }
-      console.log('last tweet - database', data.results[0]);
-      console.log('last tweet - localsaved', app.chatMessages[0]);
       app.loadFeed();
     }
   });
@@ -84,11 +60,10 @@ app.loadFeed = function() {
   for (var i = 0; i < app.chatMessages.length; i++) {
     app.renderMessage(app.chatMessages[i]);
   }
-  console.log('loaded chat messages');
 };
 
 app.clearMessages = function() {
-  $('#chats').empty();
+  $('#chats').empty();  
 };
 
 app.renderMessage = function(message) {
@@ -99,8 +74,8 @@ app.renderMessage = function(message) {
   newParagraph.innerHTML = message.text;
   newMessage.append(newUsername);
   newMessage.append(newParagraph);
+  newParagraph.setAttribute('class', message.username);
   $('#chats').append(newMessage);
-  $('#chats h3').addClass('username');
 };
 
 app.renderRoom = function(roomName) {
@@ -110,23 +85,27 @@ app.renderRoom = function(roomName) {
   $('#roomSelect option').addClass('roomname');
 };
 
+app.handleSubmit = function() {
+  var newMessage = {
+    username: app.username,
+    text: $('#message').val(),
+    roomname: app.currentRoom
+  };
+  app.send(newMessage);
+};
+
+app.handleUsernameClick = function(userClicked) {
+  var checkFriendsList = false;
+  for (var i = 0; i < this.friendsList.length; i++) {
+    if (this.friendsList[i] === userClicked) {
+      checkFriendsList = true;
+    }
+  }
+  if (!checkFriendsList) {
+    this.friendsList.push(userClicked);
+    $('.' + userClicked).css('font-weight', 'bold');
+    $('.' + userClicked).css('background-color', 'grey');
+  }  
+};
 
 
-app.handleUsernameClick = function() {};
-
-
-
-
-
-// app.fetch = function() {
-//   $.ajax({
-//     url: 'https://api.parse.com/1/classes/messages',
-//     type: 'GET',
-//     dataType: 'jsonp',
-//     success: test
-//   });
-// };
-
-// var test = function(json) {
-//   console.log(json);
-// };
